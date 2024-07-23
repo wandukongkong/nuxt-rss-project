@@ -40,7 +40,8 @@ export default defineEventHandler(async (event) => {
             // console.log("@@ title==>", title);
             console.log("@@ link==>", link);
 
-            if (title && link) {
+            // if (title && link) {
+            if (true) {
               feed.item({
                 title: title,
                 description: title,
