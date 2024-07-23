@@ -36,11 +36,16 @@ export default defineEventHandler(async (event) => {
           (index: any, element: any) => {
             const title = $(element).find(".article").text().trim();
             const link = $(element).find(".article").attr("href");
+
+            // console.log("@@ title==>", title);
+            console.log("@@ link==>", link);
+
             if (title && link) {
               feed.item({
                 title: title,
                 description: title,
-                url: `https://cafe.naver.com${link}`,
+                // url: `https://cafe.naver.com${link}`,
+                url: 'https://cafe.naver.com/cookieruntoa?iframe_url_utf8=%2FArticleRead.nhn%253Fclubid%3D31055592%2526menuid%3D1%2526boardtype%3DL%2526page%3D1%2526specialmenutype%3D%2526userDisplay%3D15%2526articleid%3D68428',
                 date: new Date(), // 실제 게시물의 날짜를 파싱하여 설정할 수 있습니다.
               });
             }
@@ -49,7 +54,6 @@ export default defineEventHandler(async (event) => {
 
         // RSS 피드를 XML 형식으로 출력
         const rssXml = feed.xml({ indent: true });
-        console.log(rssXml);
 
         // const content = iconv.decode(response.data, "EUC-KR").toString();
 
@@ -57,7 +61,14 @@ export default defineEventHandler(async (event) => {
         event.node.res.end(rssXml);
         //         event.node.res.end(`<?xml version="1.0" encoding="UTF-8"?>
         // <note>
-        //   <to>Tove333</to>
+        //   <to>Tove333</to><a href="/ArticleRead.nhn?clubid=31055592&amp;menuid=1&amp;boardtype=L&amp;page=1&amp;specialmenutype=&amp;userDisplay=15&amp;articleid=68428" onclick="clickcr(this, 'gnr.notice','','',event);" class="article">
+                                    
+                                    
+                                        <span class="head">[점검]</span>
+                                    
+
+									게임 점검 안내 - 7/24(수) 08:30 ~ 09:00 am
+								</a>
         //   <from>Jani</from>
         //   <heading>Reminder</heading>
         //   <body>Don't forget me this weekend!</body>
