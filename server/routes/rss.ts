@@ -1,48 +1,69 @@
+// const axios = require("axios");
+// const cheerio = require("cheerio");
+// const RSS = require("rss");
+
+import axios from "axios";
+import cheerio from "cheerio";
 import RSS from "rss";
 
 export default defineEventHandler(async (event) => {
-  // wrap everything in a try catch block
+  const url =
+    "https://cafe.naver.com/cookieruntoa?iframe_url=/ArticleList.nhn%3Fsearch.clubid=31055592%26search.menuid=1%26search.boardtype=L";
+
+  const headers = {
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+  };
+
   try {
-    // fetch data from dev.to
-    const response = await fetch(
-      "https://dev.to/search/feed_content?per_page=15&page=0&user_id=138553&class_name=Article&sort_by=published_at&sort_direction=desc&approved="
-    );
+    await axios
+      .get(
+        // "https://dev.to/search/feed_content?per_page=15&page=0&user_id=138553&class_name=Article&sort_by=published_at&sort_direction=desc&approved="
+        url,
+        { headers }
+      )
+      .then((response: any) => {
+        const $ = cheerio.load(response.data);
+        const feed = new RSS({
+          title: "Naver Cafe RSS Feed",
+          description: "This is an example feed for a Naver Cafe",
+          feed_url: url,
+          site_url: "https://cafe.naver.com",
+        });
 
-    // throw an error if the response is not ok
-    if (!response.ok) {
-      throw new Error(response?.status);
-    }
+        // 예시: 글 제목과 링크를 가져오기
+        $("#main-area .article-board .td_article").each(
+          (index: any, element: any) => {
+            const title = $(element).find(".article").text().trim();
+            const link = $(element).find(".article").attr("href");
+            if (title && link) {
+              feed.item({
+                title: title,
+                description: title,
+                url: `https://cafe.naver.com${link}`,
+                date: new Date(), // 실제 게시물의 날짜를 파싱하여 설정할 수 있습니다.
+              });
+            }
+          }
+        );
 
-    /*
-      await for response.json()
-      the api returns an object with the result key and result contains all our articles inside an array
-      assign result to posts
-     */
-    const { result: posts } = await response.json();
+        // RSS 피드를 XML 형식으로 출력
+        const rssXml = feed.xml({ indent: true });
+        console.log(rssXml);
 
-    // create new rss feed this will be our channel tag with website title and url
-    const feed = new RSS({
-      title: "Rafael Magalhaes",
-      site_url: "https://dev.to/rafaelmagalhaes", // link to your website/blog
-      feed_url: `https://blog.rrrm.co.uk/rss`, // path to your rss feed
-    });
-    // loop over each posts
-    for (const post of posts) {
-      // add item tag to our rss feed with correct data
-      feed.item({
-        title: post.title, // title from post to item title
-        url: `https://dev.to/${post.path}`, // full path to where our article is hosted
-        //description: '', // dev.to APIs doesn't return a description, if you have one you can add it here
-        date: post.published_at_int, // date post was created
-        categories: post.tag_list, // list of tags
+        // const content = iconv.decode(response.data, "EUC-KR").toString();
+
+        event.node.res.setHeader("content-type", "text/xml"); // we need to tell nitro to return this as a
+        event.node.res.end(rssXml);
+        //         event.node.res.end(`<?xml version="1.0" encoding="UTF-8"?>
+        // <note>
+        //   <to>Tove333</to>
+        //   <from>Jani</from>
+        //   <heading>Reminder</heading>
+        //   <body>Don't forget me this weekend!</body>
+        // </note>`);
       });
-    }
-    const feedString = feed.xml({ indent: true }); //This returns the XML as a string.
-
-    event.node.res.setHeader("content-type", "text/xml"); // we need to tell nitro to return this as a xml file
-    event.node.res.end(feedString); // send the HTTP response
   } catch (e) {
-    // return an error
     return e;
   }
 });
