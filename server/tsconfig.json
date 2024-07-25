@@ -1,12 +1,3 @@
 {
-  "extends": "../.nuxt/tsconfig.server.json",
-  "CompilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "lib": [
-      "dom",
-      "es5",
-      "es2015.promise"
-    ]
-  }
+  "extends": "../.nuxt/tsconfig.server.json"
 }
