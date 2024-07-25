@@ -8,6 +8,9 @@ export default defineEventHandler(async (event) => {
 
   // Puppeteer를 사용하여 페이지를 엽니다.
   const browser = await puppeteer.launch();
+  // const browser = await puppeteer.launch({
+  //   executablePath: process.env.HTTPS_PROXY,
+  // });
   const page = await browser.newPage();
   await page.goto(url);
 
