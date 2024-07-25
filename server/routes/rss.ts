@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     "https://cafe.naver.com/cookieruntoa?iframe_url=/ArticleList.nhn%3Fsearch.clubid=31055592%26search.menuid=1%26search.boardtype=L";
 
   // Puppeteer를 사용하여 페이지를 엽니다.
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url);
 
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
       ); // .inner_list 선택자 사용
       const notices = [];
       noticeElements.forEach((el, i) => {
-        if (i < 5) {
+        if (i < 1) {
           // 최신 공지사항 5개만 추가
           const titleElement = el.querySelector(".article");
           const title = titleElement
