@@ -1,88 +1,83 @@
-// const axios = require("axios");
-// const cheerio = require("cheerio");
-// const RSS = require("rss");
-
-import axios from "axios";
-import cheerio from "cheerio";
-import RSS from "rss";
+import { defineEventHandler } from "h3";
+import puppeteer from "puppeteer";
+import { create } from "xmlbuilder2";
 
 export default defineEventHandler(async (event) => {
   const url =
     "https://cafe.naver.com/cookieruntoa?iframe_url=/ArticleList.nhn%3Fsearch.clubid=31055592%26search.menuid=1%26search.boardtype=L";
 
-  const headers = {
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-  };
+  // Puppeteer를 사용하여 페이지를 엽니다.
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.goto(url);
 
-  try {
-    await axios
-      .get(
-        // "https://dev.to/search/feed_content?per_page=15&page=0&user_id=138553&class_name=Article&sort_by=published_at&sort_direction=desc&approved="
-        url,
-        { headers }
-      )
-      .then((response: any) => {
-        const $ = cheerio.load(response.data);
-        const feed = new RSS({
-          title: "Naver Cafe RSS Feed",
-          description: "This is an example feed for a Naver Cafe",
-          feed_url: url,
-          site_url: "https://cafe.naver.com",
-        });
+  // iframe을 찾습니다.
+  await page.waitForSelector("iframe#cafe_main");
+  const iframeElement = await page.$("iframe#cafe_main");
+  const iframe = await iframeElement?.contentFrame();
 
-        console.log("here 1");
+  if (iframe) {
+    // iframe 내부의 콘텐츠가 로드될 때까지 기다립니다.
+    await iframe.waitForSelector(".article-board");
 
-        feed.item({
-          title: "Cafe",
-          description: "Naver Cafe Rss Test",
-          // url: `https://cafe.naver.com${link}`,
-          url: "https://cafe.naver.com/cookieruntoa?iframe_url_utf8=%2FArticleRead.nhn%253Fclubid%3D31055592%2526menuid%3D1%2526boardtype%3DL%2526page%3D1%2526specialmenutype%3D%2526userDisplay%3D15%2526articleid%3D68428",
-          date: new Date(), // 실제 게시물의 날짜를 파싱하여 설정할 수 있습니다.
-        });
-
-        // 예시: 글 제목과 링크를 가져오기
-        $("#main-area .article-board .td_article").each(
-          (index: any, element: any) => {
-            const title = $(element).find(".article").text().trim();
-            const link = $(element).find(".article").attr("href");
-
-            console.log("here 2");
-
-            // console.log("@@ title==>", title);
-            console.log("@@ link==>", link);
-
-            // if (title && link) {
-            // if (true) {
-
-            feed.item({
-              title: title,
-              description: title,
-              // url: `https://cafe.naver.com${link}`,
-              url: "https://cafe.naver.com/cookieruntoa?iframe_url_utf8=%2FArticleRead.nhn%253Fclubid%3D31055592%2526menuid%3D1%2526boardtype%3DL%2526page%3D1%2526specialmenutype%3D%2526userDisplay%3D15%2526articleid%3D68428",
-              date: new Date(), // 실제 게시물의 날짜를 파싱하여 설정할 수 있습니다.
-            });
-          }
-          // }
-        );
-
-        // RSS 피드를 XML 형식으로 출력
-        const rssXml = feed.xml({ indent: true });
-
-        // const content = iconv.decode(response.data, "EUC-KR").toString();
-
-        event.node.res.setHeader("content-type", "text/xml"); // we need to tell nitro to return this as a
-        event.node.res.end(rssXml);
-        //         event.node.res.end(`<?xml version="1.0" encoding="UTF-8"?>
-        // <note>
-        //   <to>Tove333</to><a href="/ArticleRead.nhn?clubid=31055592&amp;menuid=1&amp;boardtype=L&amp;page=1&amp;specialmenutype=&amp;userDisplay=15&amp;articleid=68428" onclick="clickcr(this, 'gnr.notice','','',event);" class="article">
-
-        //   <from>Jani</from>
-        //   <heading>Reminder</heading>
-        //   <body>Don't forget me this weekend!</body>
-        // </note>`);
+    // 공지사항을 가져옵니다.
+    const notices = await iframe.evaluate(() => {
+      const noticeElements = document.querySelectorAll(
+        ".article-board .inner_list"
+      ); // .inner_list 선택자 사용
+      const notices = [];
+      noticeElements.forEach((el, i) => {
+        if (i < 5) {
+          // 최신 공지사항 5개만 추가
+          const titleElement = el.querySelector(".article");
+          const title = titleElement
+            ? titleElement.textContent.trim()
+            : "No title";
+          const linkElement = el.querySelector(".article a");
+          const link = linkElement
+            ? "https://cafe.naver.com" + linkElement.getAttribute("href")
+            : "";
+          const dateElement = el.querySelector(".date");
+          const date = dateElement ? dateElement.textContent.trim() : "No date";
+          const descriptionElement = el.querySelector(".preview");
+          const description = descriptionElement
+            ? descriptionElement.textContent.trim()
+            : "No description";
+          notices.push({ title, link, date, description });
+        }
       });
-  } catch (e) {
-    return e;
+      return notices;
+    });
+
+    // Puppeteer 브라우저를 닫습니다.
+    await browser.close();
+
+    // RSS 피드 생성
+    const feed = {
+      rss: {
+        "@version": "2.0",
+        channel: {
+          title: "Naver Cafe Notices",
+          link: url,
+          description: "Latest notices from Naver Cafe",
+          item: notices.map((notice) => ({
+            title: notice.title,
+            link: notice.link,
+            pubDate: new Date(notice.date).toUTCString(),
+            description: notice.description,
+          })),
+        },
+      },
+    };
+
+    // XML 빌더를 사용하여 RSS 피드를 XML로 변환
+    const xml = create({ version: "1.0" }).ele(feed).end({ prettyPrint: true });
+
+    // XML 응답 반환
+    event.res.setHeader("Content-Type", "application/rss+xml");
+    event.res.end(xml);
+  } else {
+    await browser.close();
+    throw new Error("Could not find the iframe URL");
   }
 });
