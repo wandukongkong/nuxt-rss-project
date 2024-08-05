@@ -1,6 +1,6 @@
 [build]
   command = "npm run build"
-  publish = ".nuxt"
+  publish = "dist"
 
 [build.environment]
   PUPPETEER_EXECUTABLE_PATH = "/opt/build/repo/node_modules/puppeteer/.local-chromium/127.0.0/chrome-linux/chrome"
