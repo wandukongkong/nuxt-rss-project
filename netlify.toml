@@ -1,0 +1,5 @@
+[build]
+  command = "npx puppeteer install"
+
+[build.environment]
+  PUPPETEER_EXECUTABLE_PATH = "/opt/build/repo/node_modules/puppeteer/.local-chromium/linux-xxxx/chrome-linux/chrome"
