@@ -10,17 +10,18 @@
     "postinstall": "npx puppeteer install"
   },
   "dependencies": {
+    "@sparticuz/chromium": "113.0.1",
     "axios": "^1.7.2",
     "cheerio": "^1.0.0-rc.12",
     "iconv-lite": "^0.6.3",
+    "netlify-plugin-chromium": "^1.1.4",
     "nuxt": "^3.12.3",
     "puppeteer": "^22.14.0",
+    "puppeteer-core": "20.1.1",
     "rss": "^1.2.2",
     "vue": "latest",
     "xml": "^1.0.1",
-    "xmlbuilder2": "^3.1.1",
-     "@sparticuz/chromium": "113.0.1",
-  "puppeteer-core": "20.1.1"
+    "xmlbuilder2": "^3.1.1"
   },
   "devDependencies": {
     "@types/rss": "^0.0.32"
