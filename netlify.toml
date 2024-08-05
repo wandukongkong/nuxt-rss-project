@@ -3,5 +3,5 @@
   publish = "dist"
 
 [build.environment]
-  PUPPETEER_EXECUTABLE_PATH = "/opt/build/repo/node_modules/puppeteer/.local-chromium/linux-1270653372/chrome-linux/chrome"
+  PUPPETEER_EXECUTABLE_PATH = "/opt/build/repo/node_modules/puppeteer/.local-chromium/linux-1120561549/chrome-linux/chrome"
 
