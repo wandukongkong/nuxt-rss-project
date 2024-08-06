@@ -16,11 +16,15 @@ export default defineEventHandler(async (event) => {
   //   executablePath: await chromium.executablePath,
   //   headless: chromium.headless,
   // });
+  // const browser = await puppeteer.launch({
+  //   args: chromium.args,
+  //   defaultViewport: chromium.defaultViewport,
+  //   executablePath: await chromium.executablePath,
+  //   headless: true,
+  // });
   const browser = await puppeteer.launch({
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath,
     headless: true,
+    args: ["--no-sandbox"],
   });
 
   const page = await browser.newPage();
