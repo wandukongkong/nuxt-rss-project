@@ -1,6 +1,5 @@
 import { defineEventHandler } from "h3";
 import puppeteer from "puppeteer";
-import chromium from "chrome-aws-lambda";
 import { create } from "xmlbuilder2";
 
 export default defineEventHandler(async (event) => {
@@ -8,11 +7,7 @@ export default defineEventHandler(async (event) => {
     "https://cafe.naver.com/cookieruntoa?iframe_url=/ArticleList.nhn%3Fsearch.clubid=31055592%26search.menuid=1%26search.boardtype=L";
 
   // Puppeteer를 사용하여 페이지를 엽니다.
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath,
-    headless: chromium.headless,
-  });
+  const browser = await puppeteer.launch();
   // const browser = await puppeteer.launch({
   //   executablePath: process.env.HTTPS_PROXY,
   // });

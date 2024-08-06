@@ -2,6 +2,5 @@
   command = "npm run build"
   publish = "dist"
 
-[build.environment]
-  PUPPETEER_EXECUTABLE_PATH = "/opt/build/repo/node_modules/puppeteer/.local-chromium/112.0.5615.49/chrome-linux/chrome"
-
+[[plugins]]
+  package = "netlify-plugin-chromium"
