@@ -1,8 +1,6 @@
 [build]
   functions = "functions"
 
-[functions]
-  node_bundler = "esbuild"
 
 [functions.rss]
   timeout = 26
