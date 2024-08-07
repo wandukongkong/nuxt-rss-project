@@ -13,11 +13,24 @@ exports.handler = async (event, context) => {
     });
 
     const page = await browser.newPage();
+
+    // 요청 차단을 통해 불필요한 리소스 로드 방지
+    await page.setRequestInterception(true);
+    page.on("request", (req) => {
+      if (
+        ["image", "stylesheet", "font", "script"].includes(req.resourceType())
+      ) {
+        req.abort();
+      } else {
+        req.continue();
+      }
+    });
+
     await page.goto(
       "https://cafe.naver.com/cookieruntoa?iframe_url=/ArticleList.nhn%3Fsearch.clubid=31055592%26search.menuid=1%26search.boardtype=L",
       {
-        waitUntil: "networkidle2",
-        timeout: 30000, // 타임아웃 시간 연장
+        waitUntil: "domcontentloaded",
+        timeout: 10000, // 타임아웃 시간을 10초로 설정
       }
     );
 
