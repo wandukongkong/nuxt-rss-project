@@ -10,4 +10,5 @@ export default defineNuxtConfig({
       PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH,
     },
   },
+  serverMiddleware: [{ path: "/rss", handler: "~/server/middleware/rss.js" }],
 });
