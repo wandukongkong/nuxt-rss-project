@@ -6,16 +6,20 @@ exports.handler = async (event, context) => {
 
   try {
     browser = await puppeteer.launch({
-      args: chromium.args,
+      args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath,
       headless: chromium.headless,
     });
 
     const page = await browser.newPage();
-    const url =
-      "https://cafe.naver.com/cookieruntoa?iframe_url=/ArticleList.nhn%3Fsearch.clubid=31055592%26search.menuid=1%26search.boardtype=L";
-    await page.goto(url);
+    await page.goto(
+      "https://cafe.naver.com/cookieruntoa?iframe_url=/ArticleList.nhn%3Fsearch.clubid=31055592%26search.menuid=1%26search.boardtype=L",
+      {
+        waitUntil: "networkidle2",
+        timeout: 30000, // 타임아웃 시간 연장
+      }
+    );
 
     // 크롤링할 데이터 추출 (예: 게시물 제목 목록)
     const titles = await page.evaluate(() =>
@@ -38,7 +42,7 @@ exports.handler = async (event, context) => {
       <rss version="2.0">
         <channel>
           <title>네이버 카페 크롤링</title>
-          <link>${url}</link>
+          <link>https://cafe.naver.com/cookieruntoa?iframe_url=/ArticleList.nhn%3Fsearch.clubid=31055592%26search.menuid=1%26search.boardtype=L</link>
           <description>네이버 카페의 게시물 목록</description>
           ${xmlItems}
         </channel>
