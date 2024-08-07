@@ -1,10 +1,11 @@
-[functions]
-  node_bundler = "esbuild"
-  directory = "functions"
-  timeout = 26
-  
 [build]
   functions = "functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[functions.rss]
+  timeout = 26
 
 [[plugins]]
   package = "netlify-plugin-chromium"
